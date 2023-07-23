@@ -1,0 +1,30 @@
+cert_manager:
+  enabled: true
+  helm_version: 1.12.2 
+  contact_email: admin@world.company.com
+ingress_controller:
+  enabled: true
+  helm_version: 4.7.1 
+kube_dashboard:
+  enabled: true
+  helm_version: 6.0.8 
+eck:
+  enabled: true
+  helm_version: 2.4.0
+
+postgres_operator:
+  enabled: false
+apps:
+  enabled: false
+
+argocd:
+  enabled: true
+  helm_version: 5.38.1
+monitoring:
+  enabled: false
+  prometheus_helm_version: 45.7.1
+rancher:
+  enabled: true
+  helm_version: 2.7.5
+logging:
+  enabled: true

@@ -1,0 +1,10 @@
+apps:
+  enabled: true
+  namespaces:
+    - namespace: guestbook
+      registry_external_secret_key: auth-worldcompany-registry
+    - namespace: guestbook-2
+      registry_external_secret_key: auth-worldcompany-registry
+dns:
+  zone: world.company
+  base_host: staging.world.company

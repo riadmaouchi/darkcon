@@ -1,0 +1,55 @@
+# Kubernetes-monitoring
+
+- name: Add prometheus stack helm repo
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: Install prometheus stack helm package
+  kubernetes.core.helm:
+    name: prometheus
+    namespace: monitoring
+    chart_ref: prometheus-community/kube-prometheus-stack
+    chart_version: "{{monitoring.prometheus_helm_version}}"
+    create_namespace: true
+    update_repo_cache: true
+    values:
+      grafana:
+        ingress:
+          enabled: true
+          annotations:
+            cert-manager.io/cluster-issuer: "{{ monitoring_issuer }}"
+            kubernetes.io/ingress.class: "{{ monitoring_ingress_class }}"
+          hosts:
+            - "{{ monitoring_suffix + '.' + dns.base_host }}"
+          path: /
+          tls:
+            - secretName: grafana-general-tls
+              hosts:
+                - "{{ monitoring_suffix + '.' + dns.base_host }}"
+      prometheus:
+        prometheusSpec:
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 10Gi
+      prometheus-node-exporter:
+        hostRootFsMount:
+          enabled: false
+      alertmanager:
+        alertmanagerSpec:
+          storage:
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 10Gi
+
+- name: Add prometheus domain {{  monitoring_suffix + '.' + dns.base_host }}
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ loadbalancer_host.stdout_lines[0] }} {{  monitoring_suffix + '.' + dns.base_host }}"

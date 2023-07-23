@@ -1,0 +1,57 @@
+redis-ha:
+  enabled: false
+server:
+  replicas: 2
+  env:
+    - name: ARGOCD_API_SERVER_REPLICAS
+      value: '2'
+    - name: "ARGOCD_GPG_ENABLED"
+      value: "false"
+  configEnabled: true
+  config:
+    url: https://{{ argo_suffix + '.' + dns.base_host }}
+  extraArgs:
+    - --insecure
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      nginx.ingress.kubernetes.io/secure-backends: "true"
+      cert-manager.io/cluster-issuer: {{ argo_cert_issuer }}
+      kubernetes.io/tls-acme: "true"
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - {{ argo_suffix + '.' + dns.base_host }}
+    tls:
+      - hosts:
+          - {{ argo_suffix + '.' + dns.base_host }}
+        secretName: argo-www-tls-secret
+    https: true
+  ingressGrpc:
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+      nginx.ingress.kubernetes.io/secure-backends: "true"
+      cert-manager.io/cluster-issuer: {{ argo_cert_issuer }}
+      kubernetes.io/tls-acme: "true"
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - {{ argo_grpc_suffix + '.' + dns.base_host }}
+    tls:
+      - hosts:
+          - {{ argo_grpc_suffix + '.' + dns.base_host }}
+        secretName: argo-api-tls-secret
+    https: true     
+controller:
+  enableStatefulSet: true
+  args:
+    appResyncPeriod: 30
+  env:
+    - name: "ARGOCD_GPG_ENABLED"
+      value: "false"
+repoServer:
+  env:
+    - name: "ARGOCD_GPG_ENABLED"
+      value: "false"
+  securityContext:
+    seccompProfile: ~

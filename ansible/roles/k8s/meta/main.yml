@@ -1,0 +1,77 @@
+---
+dependencies:
+  - role: k8s/aptitude
+    tags:
+      - aptitude
+
+  - role: k8s/docker
+    tags:
+      - docker
+
+  - role: k8s/k3s/master
+    tags:
+      - k3s
+
+  - role: k8s/helm
+    tags:
+      - helm
+
+  - role: k8s/cert_manager
+    when:
+      - cert_manager.enabled
+    tags:
+      - cert_manager
+
+  - role: k8s/ingress_controller
+    when:
+      - ingress_controller.enabled
+    tags:
+      - ingress_controller
+
+  - role: k8s/kube_dashboard
+    when:
+      - kube_dashboard.enabled
+    tags:
+      - kube_dashboard
+
+  - role: k8s/postgres_operator
+    when:
+      - postgres_operator.enabled
+    tags:
+      - postgres_operator
+
+  - role: k8s/eck
+    when:
+      - eck.enabled
+    tags:
+      - eck
+
+  - role: k8s/monitoring
+    when:
+      - monitoring.enabled
+    tags:
+      - monitoring
+
+  - role: k8s/logging
+    when:
+      - logging.enabled
+    tags:
+      - logging
+
+  - role: k8s/argocd
+    when:
+      - argocd.enabled
+    tags:
+      - argocd
+
+  - role: k8s/rancher
+    when:
+      - rancher.enabled
+    tags:
+      - rancher
+
+  - role: k8s/apps
+    when:
+      - apps.enabled
+    tags:
+      - apps

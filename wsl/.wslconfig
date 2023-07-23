@@ -1,0 +1,3 @@
+[wsl2]
+memory=9GB  
+processors=4

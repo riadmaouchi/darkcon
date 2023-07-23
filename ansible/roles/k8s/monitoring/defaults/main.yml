@@ -1,0 +1,5 @@
+---
+# Set dashboard Host url
+monitoring_suffix: "monitoring"
+monitoring_ingress_class: "nginx"
+monitoring_issuer: "letsencrypt-staging"

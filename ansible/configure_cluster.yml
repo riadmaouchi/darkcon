@@ -1,0 +1,7 @@
+---
+- hosts: it
+  connection: local
+  gather_facts: true
+  become: yes
+  roles:
+    - role: k8s

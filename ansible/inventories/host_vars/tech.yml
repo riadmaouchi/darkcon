@@ -1,0 +1,5 @@
+# Vars custom
+rancher_issuer: "letsencrypt-staging"
+dns:
+  zone: world.company
+  base_host: tech.world.company

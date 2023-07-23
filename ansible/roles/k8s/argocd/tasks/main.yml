@@ -1,0 +1,96 @@
+- name: Add domain {{ argo_suffix + '.' + dns.base_host }}
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ loadbalancer_host.stdout_lines[0] }} {{ argo_suffix + '.' + dns.base_host }}"
+
+- name: Add domain {{ argo_grpc_suffix  + '.' + dns.base_host }}
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ loadbalancer_host.stdout_lines[0] }} {{ argo_grpc_suffix  + '.' + dns.base_host }}"
+
+- name: Create argocd namespace
+  kubernetes.core.k8s:
+    name: argocd
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create argocd namespace in managed clusters
+  kubernetes.core.k8s:
+    name: argocd
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create argocd-deployer service account for argocd
+  kubernetes.core.k8s:
+    name: argocd-deployer
+    namespace: argocd
+    api_version: v1
+    kind: ServiceAccount
+    state: present
+
+- name: Create Cluster Role Binding to access argocd
+  kubernetes.core.k8s:
+    state: present
+    src: cluster-role-binding.yml
+
+- name: Retrieve service account for managed clusters
+  kubernetes.core.k8s_info:
+    name: argocd-deployer
+    namespace: argocd
+    kind: ServiceAccount
+  register: argocd_deployer_sa
+
+- name: Get argocd deployer Token for managed clusters
+  kubernetes.core.k8s_info:
+    api_version: v1
+    name: argocd-deployer-token
+    namespace: argocd
+    kind: Secret
+  register: argocd_deployer_tokens
+
+- name: Add argocd helm repo
+  kubernetes.core.helm_repository:
+    name: argo
+    repo_url: https://argoproj.github.io/argo-helm
+
+- name: Install argocd helm package in namespace argocd
+  kubernetes.core.helm:
+    name: argocd
+    namespace: argocd
+    chart_ref: argo/argo-cd
+    chart_version: "{{argocd.helm_version}}"
+    create_namespace: true
+    update_repo_cache: true
+    values: "{{ lookup('template', 'values.yml.j2') | from_yaml }}"
+
+- name: Get the admin password
+  kubernetes.core.k8s_info:
+    kind: Secret
+    name: argocd-initial-admin-secret
+    namespace: argocd
+    wait: yes
+    wait_timeout: 600
+  register: argo_admin_pwd
+
+- name: Show Argocd pwd
+  ansible.builtin.debug:
+    msg:
+      - "argocd pwd: {{ argo_admin_pwd.resources[0].data.password | b64decode  }}"
+
+- name: Login to Argo-CD
+  command: "argocd login --insecure {{ argo_suffix + '.' + dns.base_host }} --username=admin --password={{ argo_admin_pwd.resources[0].data.password | b64decode }}"
+  retries: 10
+  delay: 10
+  register: result
+  until: result.rc == 0
+  ignore_errors: true
+
+- name: Change admin password
+  command: "argocd account update-password --insecure --account admin --current-password {{ argo_admin_pwd.resources[0].data.password | b64decode }} --new-password {{ argo_admin_password }}"
+  retries: 10
+  delay: 10
+  register: result3
+  until: result3.rc == 0
+  ignore_errors: true

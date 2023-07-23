@@ -1,0 +1,18 @@
+- name: Create namespace from template
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    state: present
+    name: "{{ item.namespace }}"
+  with_items: "{{ apps.namespaces }}"
+
+- name: Add domain {{ 'guestbook' + '.' + dns.base_host }}
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ loadbalancer_host.stdout_lines[0] }} {{ 'guestbook' + '.' + dns.base_host }}"
+
+- name: Create argocd application
+  kubernetes.core.k8s:
+    state: present
+    namespace: argocd-application
+    template: "application.yml.j2"

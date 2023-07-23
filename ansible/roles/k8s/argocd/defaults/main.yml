@@ -1,0 +1,7 @@
+---
+# Set cert manager default var
+argo_admin_password: "K8sIsAwesome!"
+argo_grpc_suffix: "argocd-grpc"
+argo_suffix: "argocd"
+usernames: ["admin"]
+argo_cert_issuer: "letsencrypt-staging"

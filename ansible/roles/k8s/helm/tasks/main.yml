@@ -1,0 +1,35 @@
+---
+- name: Check if Helm binary exists.
+  stat:
+    path: "/usr/local/bin/helm"
+  register: helm_check
+
+- name: Check Helm version.
+  command: "/usr/local/bin/helm version"
+  failed_when: false
+  changed_when: false
+  register: helm_existing_version
+
+- name: Download helm.
+  unarchive:
+    src: "https://get.helm.sh/helm-v3.12.1-linux-amd64.tar.gz"
+    dest: /tmp
+    remote_src: true
+    mode: 0755
+  register: helm_download
+
+- name: Copy helm binary into place.
+  copy:
+    src: "/tmp/linux-amd64/helm"
+    dest: "/usr/local/bin/helm"
+    mode: 0755
+    remote_src: true
+  become: true
+  when: helm_download is changed
+
+- name: Install Helm Diff
+  tags: ["kube", "base"]
+  become: true
+  kubernetes.core.helm_plugin:
+    plugin_path: "https://github.com/databus23/helm-diff"
+    state: present
