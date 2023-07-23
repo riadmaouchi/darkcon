@@ -1,4 +1,3 @@
-
 <#
 .SYNOPSIS
         Install WSL, Ansible and run playbooks
