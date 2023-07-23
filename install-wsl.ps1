@@ -3,9 +3,9 @@
 .SYNOPSIS
         Install WSL, Ansible and run playbooks
 .DESCRIPTION
-This PowerShell script install WSL, Ansible and it run playbooks
+        This PowerShell script install WSL, Ansible and it run playbooks
 .EXAMPLE
-PS> powershell -command "& { . .\install-wsl.ps1; Install-WSLInteractive }"
+        PS> powershell -command "& { . .\install-wsl.ps1; Install-WSLInteractive }"
 
 .LINK
         https://github.com/rmaouchi/d@rkcon-infra
